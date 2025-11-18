@@ -4,6 +4,8 @@ pragma solidity ^0.8.24
 
 import {Test, console} from "forge-std/Test.sol";
 
+import {CCIPLocalSimulatorFork} from "@chainlink-local/src/ccip/CCIPLocalSimulatorFork.sol";
+
 import {RebaseToken} from "../src/RebaseToken.sol";
 import {RebaseTokenPool} from "../src/RebaseTokenPool.sol";
 import {Vault} from "../src/Vault.sol";
