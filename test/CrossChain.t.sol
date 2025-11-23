@@ -143,12 +143,11 @@ contract CrossChainTest is Test {
         uint256 localFork,
         uint256 remoteFork,
         Register.NetworkDetails memory localNetworkDetails,
-        Register.NetworkDetails remoteNetworkDetails,
+        Register.NetworkDetails memory remoteNetworkDetails,
         RebaseToken localToken,
         RebaseToken remoteToken
     ) public {
         vm.selectFork(localFork);
-        vm.startPrank(user);
         Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
         tokenAmounts[0] = Client.EVMTokenAmount({
             token: address(localToken),
@@ -162,13 +161,28 @@ contract CrossChainTest is Test {
             extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 0}))
         }); 
         uint256 fee = IRouterClient(localNetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector, message);
+        ccipLocalSimulatorFork.requestFromFaucet(user, fee);
+        vm.prank(user);
         IERC20(localNetworkDetails.linkAddress).approve(localNetworkDetails.routerAddress, fee);
-        IERC(localToken).approve(localNetworkDetails.routerAddress, amountToBridge);
+        vm.prank(user);
+        IERC20(address(localToken)).approve(localNetworkDetails.routerAddress, amountToBridge);
         uint256 localBalanceBefore = localToken.balanceOf(user);
+        vm.prank(user);
         IRouterClient(localNetworkDetails.routerAddress).ccipSend(
             remoteNetworkDetails.chainSelector,
             message
         );
-        vm.stopPrank();
+        uint256 localBalanceAfter = localToken.balanceOf(user);
+        assertEq(localBalanceAfter, localBalanceBefore - amountToBridge);
+        uint256 localUserInterestRate = localToken.getUserInterestRate(user);
+
+        vm.selectFork(remoteFork);
+        vm.warp(block.timestamp + 20 minutes);
+        uint256 remoteBalanceBefore = remoteToken.balanceOf(user);
+        ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork);
+        uint256 remoteBalanceAfter = remoteToken.balanceOf(user);
+        assertEq(remoteBalanceAfter, remoteBalanceBefore + amountToBridge);
+        uint256 remoteUserInterestRate = remoteToken.getUserInterestRate(user);
+        assertEq(remoteUserInterestRate, localUserInterestRate);
     }
 }
