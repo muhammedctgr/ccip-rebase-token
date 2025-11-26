@@ -4,7 +4,7 @@ out = "out"
 libs = ["lib"]
 rpc_endpoints= { sepolia-eth = "", arb-sepolia = "" }
 
-remapping = [
+remappings = [
     '@openzeppelin/=lib/openzeppelin-contracts/',
     '@ccip/=lib/ccip/',
     '@chainlink-local/=lib/chainlink-local/'

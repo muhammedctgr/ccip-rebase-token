@@ -24,8 +24,9 @@ contract ConfigurePoolScript is Script {
         remotePoolAddresses[0] = abi.encode(remotePool);
         TokenPool.ChainUpdate[] memory chainsToAdd = new TokenPool.ChainUpdate[](1);
         chainsToAdd[0] = TokenPool.ChainUpdate({
+            allowed: true,
             remoteChainSelector: remoteChainSelector,
-            remotePoolAddresses: remotePoolAddresses,
+            remotePoolAddress: abi.encodePacked(remotePool),
             remoteTokenAddress: abi.encode(remoteToken),
             outboundRateLimiterConfig: RateLimiter.Config({
                 isEnabled: outboundRateLimiterIsEnabled,
@@ -38,6 +39,6 @@ contract ConfigurePoolScript is Script {
                 rate: inboundRateLimiterRate
             })
         });
-        TokenPool(localPool).applyChainUpdates(new uint64[](0), chainsToAdd);
+        TokenPool(localPool).applyChainUpdates(chainsToAdd);
     }
 }

@@ -25,12 +25,12 @@ contract BridgeTokensScript is Script {
             token: tokenToSendAddress,
             amount: amountToSend
         });
-        Client.EVM2AnyMessage message = Client.EVM2AnyMessage({
+        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiverAddress),
             data: "",
             tokenAmounts: tokenAmounts,
             feeToken: linkTokenAddress,
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 0}));
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 0}))
         });
         uint256 ccipFee = IRouterClient(routerAddress).getFee(
             destinationChainSelector,
